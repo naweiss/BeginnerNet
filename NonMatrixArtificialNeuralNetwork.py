@@ -13,7 +13,6 @@ def printing(array):
     sizes = '[' + str(n) + ' x ' + str(m) + ']'
     print('\n'.join([sizes] + table))
 
-
 class NonMatrixArtificialNeuralNetwork:
     def __init__(self, layers, lr=0.7):
         self.layers = layers

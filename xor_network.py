@@ -2,16 +2,15 @@ from NonMatrixArtificialNeuralNetwork import NonMatrixArtificialNeuralNetwork
 
 if __name__ == '__main__':
     # xor network
-    nn = NonMatrixArtificialNeuralNetwork([2, 2, 3, 1], lr=0.75)
+    nn = NonMatrixArtificialNeuralNetwork([2, 2, 1], lr=0.75)
     data = {
         "inputs":
             [
-                [0.0, 0.0],
-                [0.0, 1.0],
-                [1.0, 0.0],
-                [1.0, 1.0]
+                [0, 0],
+                [0, 1],
+                [1, 0],
+                [1, 1]
             ],
-
         "outputs":
             [
                 [0],
@@ -24,8 +23,6 @@ if __name__ == '__main__':
 
     nn.train(data, epochs=1000)
 
-    for inp, out in inputs:
-        x = inp
+    for x, y in inputs:
         y_hat = nn.predict(x)
-        y = out
         print("===\nexpected= {}, we got= {}".format(y, y_hat))
