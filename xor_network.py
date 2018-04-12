@@ -20,8 +20,7 @@ if __name__ == '__main__':
             ]
     }
     inputs = list(zip(data["inputs"], data["outputs"]))
-
-    nn.train(data, epochs=1000)
+    nn.train(inputs, epochs=1000)
 
     for x, y in inputs:
         y_hat = nn.predict(x)

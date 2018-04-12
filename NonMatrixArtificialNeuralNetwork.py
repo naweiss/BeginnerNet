@@ -2,9 +2,6 @@ from math_functions import sigmoid, dsigmoid
 import random
 
 def printing(array):
-    """
-    Pretty print matrix
-    """
     n, m = len(array), len(array[0])
     data_str = [[str(cell) for cell in row] for row in array]
     lens = [max(map(len, col)) for col in zip(*data_str)]
@@ -33,8 +30,6 @@ class NonMatrixArtificialNeuralNetwork:
             new_output = []
             current_z = []
             current_a = []
-            # print("weight:")
-            # printing(self.W[k])
             for j in range(len(self.W[k][0])):
                 summer = 0
                 for i in range(len(output)):
@@ -59,60 +54,7 @@ class NonMatrixArtificialNeuralNetwork:
         for k in reversed(range(len(self.layers) - 1)):
             deltas[k] = self.calc_deltas_for_current_layer(k, deltas)
             changes[k] = self.calc_changes_for_weights(deltas, k)
-
         return changes
-
-    def train(self, data, epochs=500):
-        i = 0
-        for epoch in range(epochs):
-            data = self.shuffle_data(data)
-            inputs, outputs = data.values()
-            changes = []
-            for i in range(len(inputs)):
-                x = inputs[i]
-                y = outputs[i]
-                changes.append(self.back_prop(x, y))
-            self.update_weights(changes)
-
-    def update_weights(self, all_changes):
-        # for k in range(len(self.W)):
-        #     for i in range(len(self.W[k])):
-        #         for j in range(len(self.W[k][i])):
-        #             summer = 0
-        #             for l in range(len(all_changes)):
-        #                 summer += all_changes[l][k][i][j]
-        #             self.W[k][i][j] -= self.lr * (summer / len(all_changes))
-        change = []
-        for i in range(len(self.W)):
-            change_row = []
-            for j in range(len(self.W[i])):
-                change_col = []
-                for k in range(len(self.W[i][j])):
-                    winter = 0
-                    for l in range(len(all_changes)):
-                        winter += (all_changes[l][i][j][k] / len(all_changes))
-                    change_col.append(winter)
-                change_row.append(change_col)
-            change.append(change_row)
-
-        for k in range(len(self.W)):
-            current_w = self.W[k]
-            for i in range(len(current_w)):
-                for j in range(len(current_w[i])):
-                    current_w[i][j] -= self.lr * change[k][i][j]
-            self.W[k] = current_w
-
-    def shuffle_data(self, data):
-        inputs = data["inputs"]
-        outputs = data["outputs"]
-        combined = list(zip(inputs, outputs))
-        random.shuffle(combined)
-        inputs[:], outputs[:] = zip(*combined)
-        return {"inputs": inputs, "outputs": outputs}
-
-    def dcost(self, y, y_hat):
-        assert len(y) == len(y_hat)
-        return [y_hat[i] - y[i] for i in range(len(y))]
 
     def calc_deltas_for_current_layer(self, k, deltas):
         deltas_output = []
@@ -139,6 +81,30 @@ class NonMatrixArtificialNeuralNetwork:
                 new_row.append(result)
             changes.append(new_row)
         return changes
+
+    def train(self, data, epochs=500):
+        i = 0
+        for epoch in range(epochs):
+            inputs, outputs = self.shuffle_data(data)
+            for i in range(len(inputs)):
+                x = inputs[i]
+                y = outputs[i]
+                self.update_weights(self.back_prop(x, y))
+
+    def update_weights(self, changes):
+        for k in range(len(self.W)):
+            for i in range(len(self.W[k])):
+                for j in range(len(self.W[k][i])):
+                    self.W[k][i][j] -= self.lr * changes[k][i][j]
+
+    def shuffle_data(self, data):
+        random.shuffle(data)
+        inputs, outputs = zip(*data)
+        return (inputs, outputs)
+
+    def dcost(self, y, y_hat):
+        assert len(y) == len(y_hat)
+        return [y_hat[i] - y[i] for i in range(len(y))]
 
     def predict(self, x):
         return self.forward_prop(x)
