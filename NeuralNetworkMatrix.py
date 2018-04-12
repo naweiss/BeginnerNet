@@ -1,34 +1,6 @@
-import random
+from math_functions import sigmoid, dsigmoid
 from math import exp
-import pickle
-import os
-
-from PIL import Image
-
-from Network import training_dir, testing_dir
-
-
-def sigmoid(value):
-    try:
-        return 1.0 / (1.0 + exp(-value))
-    except:
-        pass
-
-
-def dsigmoid(value):
-    return sigmoid(value) * (1 - sigmoid(value))
-
-
-def ReLU(x):
-    return max(0, x)
-
-
-def ReLU_derivative(x):
-    if x < 0:
-        return 0
-    else:
-        return 1
-
+import random
 
 def activation_function(x, derivative=False):
     if derivative:
@@ -312,24 +284,6 @@ class NeuralNetworkMatrix:
         for i in range(len(changes)):
             self.weights[i] -= changes[i] * self.learning_rate
 
-    def save(self):
-        print("Saving Network...")
-        with open("data\weights", 'wb+') as f:
-            pickle.dump(self.weights, f)
-        with open("data\layers", 'wb+') as f:
-            pickle.dump(self.layers, f)
-        with open("data\lr", 'wb+') as f:
-            pickle.dump(self.learning_rate, f)
-
-    def load(self):
-        print("Loading Network...")
-        with open("data\weights", 'rb') as f:
-            self.weights = pickle.load(f)
-        with open("data\layers", 'rb') as f:
-            self.layers = pickle.load(f)
-        with open("data\lr", 'rb') as f:
-            self.learning_rate = pickle.load(f)
-
     @staticmethod
     def calc_sum_error(expected_output, outputs):
         return (1 / len(expected_output)) * sum(
@@ -361,75 +315,3 @@ class NeuralNetworkMatrix:
 
     def normal(self, output):
         return output.data[0].index(max(output.data[0]))
-
-
-def preprocess_data(dir, precentage=1.0):
-    categories = os.listdir(dir)
-    data = {"inputs": [], "outputs": []}
-    print("Started preprocessing")
-    for category in categories:
-        expected_value = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        expected_value[int(category)] = 1.0
-        files = os.listdir(dir + "\\" + category)
-        files = files[:int(len(files) * precentage)]
-        num_files = len(files)
-        i = 0
-        arr = []
-        out = []
-        for file in files:
-            if i % 1000 == 0:
-                print("file {}/{} at category {}".format(i, num_files, category))
-            file_dir = dir + "\\" + category + "\\" + file
-            pixels = get_pixels_for_pic(file_dir)
-            data["inputs"].append(pixels)
-            data["outputs"].append(expected_value)
-            i += 1
-    return data
-
-
-def get_pixels_for_pic(pic_dir):
-    img = Image.open(pic_dir)
-    pix = img.load()
-    pixels = []
-    for i in range(28):
-        for j in range(28):
-            pixels.append(pix[i, j] / 255)
-    return pixels
-
-
-if __name__ == '__main__':
-    lr = 1.5
-    batch_size = 100
-    epochs = 100
-
-    choice = input("== Menu ==\n\t"
-                   "1.Train network\n\t"
-                   "2.Test saved network\n\t"
-                   "3.Test small network\n\t"
-                   "4.Predict random values\n\t")
-    if choice == '1':
-        nn = NeuralNetworkMatrix([28 * 28, 16, 10], learning_rate=lr)
-        percentage = 0.01
-        data = preprocess_data(training_dir, precentage=percentage)
-        nn.new_train(data, batch_size=batch_size, epochs=epochs)
-        nn.save()
-    elif choice == '2':
-        nn = NeuralNetworkMatrix([28 * 28, 16, 10], learning_rate=lr)
-        nn.load()
-        data = preprocess_data(testing_dir, precentage=0.1)
-        print("accuracy=", nn.test(data), "%")
-    elif choice == '3':
-        nn = NeuralNetworkMatrix([2, 2, 1])
-        print(nn.predict([1, 1]))
-    elif choice == '4':
-        nn = NeuralNetworkMatrix([28 * 28, 500, 200, 100, 10], learning_rate=lr)
-        percentage = 0.001
-        data = preprocess_data(training_dir, precentage=percentage)
-        # test_data = preprocess_data(testing_dir, precentage=0.1)
-        nn.new_train(data, data, batch_size=batch_size, epochs=epochs)
-        inputs = list(zip(data["inputs"], data["outputs"]))[:10]
-        for inp, out in inputs:
-            x = inp
-            y_hat = nn.normal(nn.predict(x))
-            y = out.index(1)
-            print("===\nexpected= {}, we got= {}".format(y, y_hat))

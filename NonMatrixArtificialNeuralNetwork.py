@@ -1,7 +1,5 @@
-import random
-
 from math_functions import sigmoid, dsigmoid
-
+import random
 
 def printing(array):
     """
@@ -145,8 +143,3 @@ class NonMatrixArtificialNeuralNetwork:
 
     def predict(self, x):
         return self.forward_prop(x)
-
-
-if __name__ == '__main__':
-    nn = NonMatrixArtificialNeuralNetwork([2, 2, 1])
-    print("output", nn.forward_prop([1, 1]))
